@@ -3,6 +3,7 @@ package main
 import (
 	"trees/twoThreeTree"
 	"fmt"
+	"math/rand"
 )
 
 func main() {
@@ -17,8 +18,12 @@ func main() {
 		"Patrick": 123,
 	}*/
 	tree := twoThreeTree.NewTree()
-	for  i:=0;i<10;i++{
+	values := make([]int,200)
+	for  i:=0;i<200;i++{
+		ran := rand.Intn(500)-100
+		values[i]=ran
 		tree.Insert(i)
 	}
 	fmt.Println(tree)
+	fmt.Printf("%d, %d",len(values),tree.Length())
 }
