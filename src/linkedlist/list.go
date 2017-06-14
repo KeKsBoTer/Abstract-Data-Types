@@ -1,6 +1,8 @@
 package linkedlist
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type List struct {
 	root *chain
@@ -12,7 +14,7 @@ func NewList() *List {
 
 func (l *List) Insert(key, value interface{}) {
 	if l.root == nil {
-		l.root = &chain{key:key,value: value}
+		l.root = &chain{key: key, value: value}
 	} else {
 		l.root.insert(key, value)
 	}
@@ -72,62 +74,83 @@ type chain struct {
 }
 
 func (c *chain) insert(key, value interface{}) {
-	if c.next == nil {
-		c.next = &chain{key: key, value: value}
-	} else {
-		c.next.insert(key, value)
+	node := c
+	for node != nil {
+		if node.next == nil {
+			node.next = &chain{key: key, value: value}
+			return
+		}
+		node = node.next
 	}
 }
 
 func (c *chain) delete(key interface{}) (*chain, bool) {
-	if c.value == key {
-		return c.next, true
-	} else if c.next != nil {
-		ok := false
-		c.next, ok = c.next.delete(key)
-		return c, ok
-	} else {
-		return c, false
+	node := c
+	last := node
+	for node != nil {
+		if node.key == key {
+			if node == c {
+				return c.next, true
+			} else {
+				last.next = node.next
+				return c, true
+			}
+		}
+		last = node
+		node = node.next
 	}
+	return c, false
 }
 
 func (c *chain) find(key interface{}) interface{} {
-	if c.key == key {
-		return c.value
-	} else if c.next != nil {
-		return c.next.find(key)
-	} else {
-		return nil
+	node := c
+	for node != nil {
+		if node.value == key {
+			return node.value
+		}
+		node = node.next
 	}
+	return nil
 }
 
 func (c *chain) length() int {
-	if c.next == nil {
-		return 1
-	} else {
-		return 1 + c.next.length()
+	node := c
+	length := 0
+	for node != nil {
+		length += 1
+		node = node.next
 	}
+	return length
 }
 
 func (c *chain) contains(key interface{}) bool {
-	if c.value == key {
-		return true
-	} else {
-		return c.next != nil && c.next.contains(key)
+	chain := c
+	for chain != nil {
+		if chain.value == key {
+			return true
+		}
+		chain = chain.next
 	}
+	return false
 }
 
 func (c *chain) String() string {
-	result := fmt.Sprintf("%v", c.key) + "=" + fmt.Sprintf("%v", c.value)
-	if c.next != nil {
-		result += "," + c.next.String()
+	chain := c
+	result := ""
+	for chain != nil {
+		result += fmt.Sprintf("%v", chain.key) + "=" + fmt.Sprintf("%v", chain.value)
+		if chain.next != nil {
+			result += ","
+		}
+		chain = chain.next
 	}
 	return result
 }
 
 func (c *chain) iterate(f func(interface{}, interface{})) {
-	f(c.key, c.value)
-	if c.next != nil {
-		c.next.iterate(f)
+	chain := c
+	for chain != nil {
+		f(chain.key, chain.value)
+		chain = chain.next
 	}
 }
