@@ -2,35 +2,36 @@ package trie
 
 import (
 	"errors"
+	"fmt"
 )
 
-type Tree struct {
+type tree struct {
 	root node
 }
 
-func NewTree() *Tree {
-	return &Tree{root: node{}}
+func NewTree() *tree {
+	return &tree{root: node{}}
 }
 
 /// Finds associated value for key
 /// returns error if key was not found in trie
-func (t *Tree) Find(key string) (interface{}, error) {
+func (t *tree) Find(key string) (interface{}, error) {
 	return t.root.find(key)
 }
 
 /// Insert key-value-pair into trie
-func (t *Tree) Insert(key string, value interface{}) {
+func (t *tree) Insert(key string, value interface{}) {
 	t.root.insert(key, value)
 }
 
 /// If the tree contains the given value, the associated value is removed from the trie
 /// returns true if key was deleted successfully
-func (t *Tree) Delete(key string) bool {
+func (t *tree) Delete(key string) bool {
 	return t.root.delete(key)
 }
 
 //Checks if the given key is associated with a value in the trie
-func (t *Tree) Contains(key string) bool {
+func (t *tree) Contains(key string) bool {
 	v, e := t.root.find(key)
 	return e == nil && v != nil
 }
@@ -38,17 +39,17 @@ func (t *Tree) Contains(key string) bool {
 /// Calls given function for every key-value-pair
 /// argument:
 /// 	- f func(string,interface{}) : function, which is called with key and value as arguments
-func (t *Tree) ForEach(f func(string, interface{})) {
+func (t *tree) ForEach(f func(string, interface{})) {
 	t.root.iterate("", f)
 }
 
 /// Returns all existing keys in trie as array of strings
-func (t *Tree) Keys() []string {
+func (t *tree) Keys() []string {
 	return t.root.iterate("", nil)
 }
 
 /// Returns all key-value-pairs as map (golang type)
-func (t *Tree) ToMap() map[string]interface{} {
+func (t *tree) ToMap() map[string]interface{} {
 	m := map[string]interface{}{}
 	t.root.iterate("", func(key string, value interface{}) {
 		m[key] = value
@@ -56,13 +57,33 @@ func (t *Tree) ToMap() map[string]interface{} {
 	return m
 }
 
-// Returns all existing values in trie
-func (t *Tree) Values() []interface{} {
+/// Returns all existing values in trie
+func (t *tree) Values() []interface{} {
 	values := []interface{}{}
 	t.root.iterate("", func(key string, value interface{}) {
 		values = append(values, value)
 	})
 	return values
+}
+
+/// Returns the amount of key-value-pairs in the trie as integer
+func (t *tree) Size() int {
+	return len(t.Keys())
+}
+
+// Converts trie to string e.g {test=2,go=test,key3={2,5}}
+func (t *tree) String() string {
+	result := "{"
+	i := 0
+	mLen := t.Size()
+	t.ForEach(func(key string, value interface{}) {
+		result += key + "=" + fmt.Sprintf("%v", value)
+		if i+1 < mLen {
+			result += ","
+		}
+		i++
+	})
+	return result + "}"
 }
 
 type node struct {
@@ -146,7 +167,7 @@ func (t *node) iterate(pre string, f func(string, interface{})) []string {
 			f(pre, t.Value)
 		}
 	}
-	if len(t.chars	) > 0  {
+	if len(t.chars) > 0 {
 		for i, e := range t.chars {
 			arr = append(arr, t.tries[i].iterate(pre+string(e), f)...)
 		}
