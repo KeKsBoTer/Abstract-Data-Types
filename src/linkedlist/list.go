@@ -128,6 +128,6 @@ func (c *chain) String() string {
 func (c *chain) iterate(f func(interface{}, interface{})) {
 	f(c.key, c.value)
 	if c.next != nil {
-		c.iterate(f)
+		c.next.iterate(f)
 	}
 }
