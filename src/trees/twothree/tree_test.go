@@ -1,4 +1,4 @@
-package twoThreeTree
+package twothree
 
 import (
 	"testing"
