@@ -27,7 +27,6 @@ func TestList_Insert(t *testing.T) {
 	}
 	for _, e := range testList {
 		if !list.Contains(e) {
-
 			t.Error(
 				"For", list,
 				"expected", true,

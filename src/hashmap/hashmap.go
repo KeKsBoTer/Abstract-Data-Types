@@ -2,7 +2,6 @@ package hashmap
 
 import (
 	"linkedlist"
-	"fmt"
 )
 
 type hashedMap struct {
@@ -78,14 +77,15 @@ func (m *hashedMap) Size() int {
 
 func (m *hashedMap) String() string {
 	result := "{"
-	i := 0
-	m.ForEach(func(key string, value interface{}) {
-		result += key + "=" + fmt.Sprintf("%v", value)
-		if i+1 < m.entries {
-			result += ","
+	for i, l := range m.array {
+		if l.Length() > 0 {
+			lString := l.String()
+			result += lString[1:len(lString)-1]
+			if i+1 < m.size {
+				result += ","
+			}
 		}
-		i++
-	})
+	}
 	return result + "}"
 }
 
@@ -113,9 +113,10 @@ func (m *hashedMap) nextPrime() int {
 }
 
 func (m *hashedMap) hashCode(s string) int {
-	if s == "" {
-		return 0
-	} else {
-		return (int(s[0]) + 128*m.hashCode(s[1:])) % m.size
+	hash := 0
+	l := len(s)
+	for i := 0; i < l; i++ {
+		hash = (int(s[l-1-i]) + 128*hash) % m.size
 	}
+	return hash
 }
