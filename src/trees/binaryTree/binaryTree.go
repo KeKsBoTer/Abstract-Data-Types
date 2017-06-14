@@ -4,26 +4,27 @@ import (
 	"errors"
 	"strings"
 	"math"
+	"fmt"
 )
 
-// Binary Tree
+// Binary tree
 // References:
 // 	https://appliedgo.net/bintree/
 //	https://github.com/karlstroetmann/Algorithms/blob/master/SetlX/BinaryTree/binary-tree.stlx
-type Tree struct {
+type tree struct {
 	root *node
 }
 
-func NewTree() *Tree {
-	return &Tree{}
+func NewTree() *tree {
+	return &tree{}
 }
 
-// Inserts new key-Value pair to the Tree
+// Inserts new key-Value pair to the tree
 // arguments:
 //	- key int: key to find the Value
 //	- Value string: Value to insert at the key
 // returns: error if insertion fails
-func (t *Tree) Insert(key int, value string) error {
+func (t *tree) Insert(key int, value string) error {
 	if t.root == nil {
 		t.root = &node{Key: key, Value: value}
 		t.root.restoreHeight()
@@ -32,24 +33,24 @@ func (t *Tree) Insert(key int, value string) error {
 	return t.root.insert(key, value)
 }
 
-// Finds Value in Tree for given key
+// Finds Value in tree for given key
 // arguments:
 //	- key int: key to find the Value for
 // returns:
 //	- string: Value of the key (empty string if no Value was found)
 //	- bool: true if key was found in tree
-func (t *Tree) Find(key int) (string, bool) {
+func (t *tree) Find(key int) (string, bool) {
 	if t.root == nil {
 		return "", false
 	}
 	return t.root.find(key)
 }
 
-// Deletes key-Value pair from Tree
+// Deletes key-Value pair from tree
 // arguments:
 //	- key int: key and a associated Value, which should be deleted
-// returns: error if key was not found in Tree
-func (t *Tree) Delete(key int) error {
+// returns: error if key was not found in tree
+func (t *tree) Delete(key int) error {
 	if t.root == nil {
 		return errors.New("Cannot delete from an empty tree")
 	}
@@ -67,13 +68,13 @@ func (t *Tree) Delete(key int) error {
 // Calls the given function with every key and Value ordered by the key (ascending)
 // arguments:
 //	- f func(int,string): the function to call, first argument is key, second Value
-func (t *Tree) ForEach(f func(int, string)) {
+func (t *tree) ForEach(f func(int, string)) {
 	t.root.traverse(t.root, func(n *node) {
 		f(n.Key, n.Value)
 	})
 }
 
-func (t *Tree) Keys() []int {
+func (t *tree) Keys() []int {
 	keys := []int{}
 	t.ForEach(func(key int, value string) {
 		keys = append(keys, key)
@@ -90,7 +91,7 @@ func contains(s []string, e string) bool {
 	return false
 }
 
-func (t *Tree) Values(distinct bool) []string {
+func (t *tree) Values(distinct bool) []string {
 	values := []string{}
 	t.ForEach(func(key int, value string) {
 		if !distinct || !contains(values, value) {
@@ -100,29 +101,29 @@ func (t *Tree) Values(distinct bool) []string {
 	return values
 }
 
-func (t *Tree) ContainsValue(s string) bool {
+func (t *tree) ContainsValue(s string) bool {
 	found := false
 	t.ForEach(func(key int, value string) {
 		if strings.Compare(s, value) == 0 {
-			found = true;
-			return;
+			found = true
+			return
 		}
 	})
 	return found
 }
 
-func (t *Tree) ContainsKey(key int) bool {
+func (t *tree) ContainsKey(key int) bool {
 	found := false
 	t.ForEach(func(k int, value string) {
 		if k == key {
-			found = true;
-			return;
+			found = true
+			return
 		}
 	})
 	return found
 }
 
-func (t *Tree) ToMap() map[int]string {
+func (t *tree) ToMap() map[int]string {
 	m := make(map[int]string)
 	t.ForEach(func(key int, value string) {
 		m[key] = value
@@ -130,18 +131,7 @@ func (t *Tree) ToMap() map[int]string {
 	return m
 }
 
-func (t *Tree) Height() int {
-	max := 0
-	t.root.traverse(t.root, func(n *node) {
-		println(n.height)
-		if n.height > max {
-			max = n.height
-		}
-	})
-	return max
-}
-
-func (t *Tree) Size() int {
+func (t *tree) Size() int {
 	size := 0
 	t.ForEach(func(key int, value string) {
 		size++
@@ -149,7 +139,7 @@ func (t *Tree) Size() int {
 	return size
 }
 
-func (t *Tree) GetKeys(value string) []int {
+func (t *tree) GetKeys(value string) []int {
 	result := []int{}
 	t.ForEach(func(k int, v string) {
 		if strings.Compare(value, v) == 0 {
@@ -159,7 +149,25 @@ func (t *Tree) GetKeys(value string) []int {
 	return result
 }
 
-// Node structure for the Tree
+func (t *tree) String() string {
+	if t.root == nil {
+		return "{}"
+	} else {
+		result := "{"
+		max := t.Size()
+		i := 0
+		t.root.traverse(t.root, func(n *node) {
+			result += fmt.Sprintf("%v", n.Key) + "=" + n.Value
+			if i+1 < max {
+				result += ","
+			}
+			i++
+		})
+		return result + "}"
+	}
+}
+
+// Node structure for the tree
 // Key int: node key
 // Value string: node Value
 // left,right *node: the nodes left and right children
@@ -231,7 +239,7 @@ func (n *node) find(key int) (string, bool) {
 		return n.right.find(key)
 	}
 }
-
+/// Finds recursive the node with max value in the current node
 func (n *node) findMax(parent *node) (*node, *node) {
 	if n.right == nil {
 		return n, parent
@@ -239,6 +247,7 @@ func (n *node) findMax(parent *node) (*node, *node) {
 	return n.right.findMax(n)
 }
 
+/// Replaces a node in parent with the replacement
 func (n *node) replaceNode(parent, replacement *node) error {
 	if n == nil {
 		return errors.New("replaceNode() not allowed on a nil node")
@@ -252,6 +261,8 @@ func (n *node) replaceNode(parent, replacement *node) error {
 	return nil
 }
 
+/// Deletes the key-value-pair in the tree for the given key.
+/// If the value was not found an error is return (else nil)
 func (n *node) delete(key int, parent *node) error {
 	if n == nil {
 		return errors.New("Key to be deleted does not exist in the tree")
@@ -289,6 +300,7 @@ func (n *node) delete(key int, parent *node) error {
 	}
 }
 
+// Calculates the height of a node
 func (n *node) restoreHeight() {
 	switch {
 	case n.left == nil && n.right == nil:
@@ -304,15 +316,19 @@ func (n *node) restoreHeight() {
 		n.height = 1 + int(math.Max(float64(n.right.height), float64(n.left.height)))
 	}
 }
-func (t *node) traverse(n *node, f func(*node)) {
-	if n == nil {
+
+/// Calls the given function for every node in the tree
+func (n *node) traverse(t *node, f func(*node)) {
+	if t == nil {
 		return
 	}
-	t.traverse(n.left, f)
-	f(n)
-	t.traverse(n.right, f)
+	n.traverse(t.left, f)
+	f(t)
+	n.traverse(t.right, f)
 }
 
+/// Restores the trees structure,
+/// to ensure the height height difference between the left and the right node is never bigger than 1
 func (n *node) restore() {
 	if math.Abs(float64(n.left.height-n.right.height)) <= 1 {
 		n.restoreHeight()
@@ -344,4 +360,4 @@ func (n *node) restore() {
 		}
 	}
 	n.restoreHeight()
-};
+}
